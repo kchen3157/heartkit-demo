@@ -103,7 +103,7 @@ export const Root = types
 }))
 .actions(self => ({
     afterCreate() {
-        setInterval(self.backgroundRoutine, 2000);
+        // setInterval(self.backgroundRoutine, 2000);
     },
     beforeDestroy() {
 
