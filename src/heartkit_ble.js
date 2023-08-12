@@ -1,3 +1,7 @@
+import { IRoot, Root } from "./models/root";
+import * as Constants from './constants';
+import { IHeartKitState } from "./models/root";
+
 // uuid should have lowercase hex chars.
 const UUID_ECG_SERVICE = '00002760-08c2-11e1-9073-0e8ac72e2000';
 const UUID_WRITE_ONLY = '00002760-08c2-11e1-9073-0e8ac72e2010';
@@ -8,17 +12,19 @@ const UUID_ECG_RESULT = '00002760-08c2-11e1-9073-0e8ac72e2014';
 const UUID_NOTIFY_ONLY = '00002760-08c2-11e1-9073-0e8ac72e2015';
 
 const SAMPLE_DATA_LEN = 2500;
-
-export class heartkit_ble {
+class ECGSensor {
   constructor() {
     this.device = null;
     this.server = null;
     this.service = null;
     this._characteristics = new Map();
     this.sampleData = new Float32Array(SAMPLE_DATA_LEN);
+    this.root = null;
   }
 
-  connect() {
+  connect(root: IRoot) {
+    // save store's root
+    this.root = root;
     return navigator.bluetooth.requestDevice({
       filters: [{
         namePrefix: 'Cordio',
@@ -48,9 +54,9 @@ export class heartkit_ble {
   /* Start/Stop ECG Service Subscription*/
 
   startNotificationsECGService() {
-    this._startNotifications(UUID_ECG_SAMPLE).then(this.handleECGSample);
-    this._startNotifications(UUID_ECG_SAMPLE_MASK).then(this.handleECGSampleMask);
-    this._startNotifications(UUID_ECG_RESULT).then(this.handleECGResult);
+    this._startNotifications(UUID_ECG_SAMPLE).then(handleECGSample);
+    this._startNotifications(UUID_ECG_SAMPLE_MASK).then(handleECGSampleMask);
+    this._startNotifications(UUID_ECG_RESULT).then(handleECGResult);
   }
   stopNotificationsECGService() {
     this._stopNotifications(UUID_ECG_SAMPLE);
@@ -116,31 +122,31 @@ export class heartkit_ble {
     return characteristic.stopNotifications()
       .then(() => characteristic);
   }
-
-  handleECGSample(ECGData) {
-    console.log("handleECGSample");
-    ECGData.addEventListener('characteristicvaluechanged', event => {
-      // this.parseECGSample(event.target.value);
-      console.log("parseECGSample");
-      console.log(event.target.value);  
-    })
-  }
-  
-  handleECGSampleMask(ECGData) {
-    console.log("handleECGSampleMask");
-    ECGData.addEventListener('characteristicvaluechanged', event => {
-      // this.parseECGSampleMask(event.target.value);
-      console.log("parseECGSampleMask");
-      console.log(event.target.value);  
-    })
-  }
-  
-  handleECGResult(ECGData) {
-    console.log("handleECGResult");
-    ECGData.addEventListener('characteristicvaluechanged', event => {
-      // this.parseECGResult(event.target.value);
-      console.log("parseECGResult");
-      console.log(event.target.value);  
-    })
-  }
 }
+
+export const ecgSensorInstance = new ECGSensor();
+
+function handleECGSample(ECGData) {
+  console.log("handleECGSample");
+  ECGData.addEventListener('characteristicvaluechanged', event => {
+    ecgSensorInstance.parseECGSample(event.target.value);
+    // call model's action
+    // ecgSensorInstance.root.setDataId(1234);
+  })
+}
+
+function handleECGSampleMask(ECGData) {
+  console.log("handleECGSampleMask");
+  ECGData.addEventListener('characteristicvaluechanged', event => {
+    ecgSensorInstance.parseECGSampleMask(event.target.value);
+  })
+}
+
+function handleECGResult(ECGData) {
+  console.log("handleECGResult");
+  ECGData.addEventListener('characteristicvaluechanged', event => {
+    ecgSensorInstance.parseECGResult(event.target.value);
+    
+  })
+}
+

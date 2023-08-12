@@ -78,12 +78,26 @@ export const Root = types
         }
         return false;
     }),
+    setDataId (dataId: number ) {
+        console.log('setDataId');
+        console.log(dataId);
+        if (dataId !== self.state.dataId) {
+            self.state.dataId = dataId;
+            return true;
+        }
+        return false;
+    },
     fetchState: flow(function* () {
         const state = yield api.getState();
         if (state !== undefined) {
             self.state = state;
         }
     }),
+    setState (state: IHeartKitState) {
+        if (state !== undefined) {
+            self.state = state;
+        }
+    },
 }))
 .actions(self => ({
     backgroundRoutine: flow(function*() {

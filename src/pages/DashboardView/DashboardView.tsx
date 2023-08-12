@@ -9,10 +9,11 @@ import BeatsPlot from "./components/BeatsPlot";
 import HeartChart from "./components/HeartChart";
 
 const DashboardView = () => {
-  const { root: { state }} = useStore();
+  const store = useStore();
+  const state = store.root.state;
   return (
     <Box sx={{ pb: 4, pt: 8, pl: 6, pr: 6 }}>
-      <DashboardHeader appState={state.appState} />
+      <DashboardHeader root={store.root} />
       <Box flexGrow={1}>
         <Grid
           container

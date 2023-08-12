@@ -4,26 +4,25 @@ import { Box } from '@mui/system';
 import { HeartKitIcon, NeuralSpotIcon } from '../../../assets/icons';
 import { observer } from 'mobx-react-lite';
 import { PulsedDiv } from '../../../components/utils';
-import { heartkit_ble } from '../../../heartkit_ble';
+import { ecgSensorInstance } from '../../../heartkit_ble'; // Adjust the path
+import { IRoot } from "../../../models/root";
 
 interface Props {
-  appState: string
+  root: IRoot
 }
 
-const hearkit_ble_dev = new heartkit_ble();
-
-const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+const handleClick = (root: IRoot) => () => {
   // console.log(event.target);
   // console.log(event.currentTarget);
   console.log("WEBLE BUTTON clicked!");
-  hearkit_ble_dev.connect()
-  .then(() => hearkit_ble_dev.startNotificationsECGService());
+  ecgSensorInstance.connect(root)
+  .then(() => ecgSensorInstance.startNotificationsECGService());
 };
 
 
-const DashboardHeader = ({ appState }: Props) => {
-  console.debug(appState);
-  console.log(appState)
+const DashboardHeader = ({ root }: Props) => {
+  console.debug(root.state.appState);
+  console.log(root.state.appState)
   return (
       <Header>
         <Toolbar>
@@ -36,7 +35,7 @@ const DashboardHeader = ({ appState }: Props) => {
           </Typography>
 
           <div>
-          <button onClick={handleClick}>Connect to Ambiq Heartkit EVB &#x2764;</button>
+          <button onClick={handleClick(root)}>Connect to Ambiq Heartkit EVB &#x2764;</button>
           </div>
           <Box sx={{ flexGrow: 1 }} />
 
