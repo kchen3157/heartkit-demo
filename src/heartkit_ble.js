@@ -1,5 +1,6 @@
 import { IRoot, Root } from "./models/root";
 import * as Constants from './constants';
+import { IHeartKitResult } from "./models/root";
 import { IHeartKitState } from "./models/root";
 
 // uuid should have lowercase hex chars.
@@ -146,7 +147,64 @@ function handleECGResult(ECGData) {
   console.log("handleECGResult");
   ECGData.addEventListener('characteristicvaluechanged', event => {
     ecgSensorInstance.parseECGResult(event.target.value);
+  
+    const num_samples = 2500;
+    const offset = Math.random() * 200;
+    const amp = Math.random() * 4 + 3; // Random value between 3 and 7
+    const data = Array.from({ length: num_samples }, (_, i) => {
+      return amp * Math.cos((i + offset) * (2 * Math.PI) / 250);
+    });
+
+    const seg_mask = Array.from({ length: 10 }, () => {
+      return [0, 1, 0, 2, 0, 3, 0];
+    }).flat();
+
+    const AppState = ["IDLE_STATE", "COLLECT_STATE", "PREPROCESS_STATE", "INFERENCE_STATE", "DISPLAY_STATE"]; // Assuming AppState is an enum-like structure
+
+    function getRandomAppState() {
+      return AppState[Math.floor(Math.random() * AppState.length)];
+    }
+
+    const results = {
+      heartRate: Math.floor(Math.random() * 101) + 20, // Random value between 20 and 120
+      heartRhythm: Math.floor(Math.random() * 3), // Random value between 0 and 2
+      numNormBeats: Math.floor(Math.random() * 11), // Random value between 0 and 10
+      numPacBeats: Math.floor(Math.random() * 7), // Random value between 0 and 6
+      numPvcBeats: Math.floor(Math.random() * 4), // Random value between 0 and 3
+      arrhythmia: Math.random() < 0.5, // Random true/false value
+    };
+
+    const state = {
+      dataId: Math.floor(Math.random() * 101), // Random value between 0 and 100
+      // appState: getRandomAppState(),
+      appState: 'DISPLAY_STATE',
+      data: data,
+      segMask: seg_mask,
+      results: results,
+    };
+
+
+//     const validAppStateValues = ['DISPLAY_STATE', 'IDLE_STATE', /* ... */];
+
+//     const heartKitStateObject = {
+//     dataId: 61,
+//     appState: 'DISPLAY_STATE',
+//     data: [0.10285352224391943, 0.19738205969205094, /* ... */],
+//     segMask: [0, 1, 0, 2, 0, 3, 0, /* ... */],
+//     results: {
+//       heartRate: 70,
+//       heartRhythm: 1,
+//       numNormBeats: 10,
+//       numPacBeats: 5,
+//       numPvcBeats: 3,
+//       arrhythmia: false,
+//     },
+// };
+
+    ecgSensorInstance.root.setState(state);
     
+    // Assuming set_global_state is a function to set the global state
+    // set_global_state(state);
   })
 }
 
